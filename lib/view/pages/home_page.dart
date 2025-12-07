@@ -137,7 +137,8 @@ class _HomePageState extends State<HomePage> {
 
                                   return DropdownButton<int>(
                                     isExpanded: true,
-                                    value: selectedProvinceOriginId, // Masih null saat awal
+                                    value:
+                                        selectedProvinceOriginId, // Masih null saat awal
                                     hint: const Text('Pilih provinsi'),
                                     items: provinces
                                         .map(
@@ -147,7 +148,8 @@ class _HomePageState extends State<HomePage> {
                                           ),
                                         )
                                         .toList(),
-                                    onChanged: (newId) { // Ketika user memilih provinsi baru, misalnya ID 1
+                                    onChanged: (newId) {
+                                      // Ketika user memilih provinsi baru, misalnya ID 1
                                       setState(() {
                                         selectedProvinceOriginId = newId;
                                         selectedCityOriginId =
@@ -155,9 +157,7 @@ class _HomePageState extends State<HomePage> {
                                       });
                                       // Jika ada ID provinsi yang dipilih, load daftar kota untuk provinsi tersebut
                                       if (newId != null) {
-                                        vm.getCityOriginList(
-                                          newId,
-                                        );
+                                        vm.getCityOriginList(newId);
                                       }
                                     },
                                   );
@@ -515,9 +515,14 @@ class _HomePageState extends State<HomePage> {
                             itemCount:
                                 vm.costList.data?.length ??
                                 0, // Jumlah item berdasarkan data ongkir
-                            itemBuilder: (context, index) => CardCost(
-                              vm.costList.data!.elementAt(index),
-                            ), // Gunakan CardCost untuk setiap item
+                            itemBuilder: (context, index) {
+                              final cost = vm.costList.data!.elementAt(index);
+                              return GestureDetector(
+                                onTap: () => _showCostDetail(context, cost),
+                                child: CardCost(cost),
+                              );
+                            },
+                            // Gunakan CardCost untuk setiap item
                           );
                         default:
                           return const Padding(
@@ -555,4 +560,124 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
+}
+
+void _showCostDetail(BuildContext context, Costs cost) {
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Colors.white,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    ),
+    builder: (_) {
+      return DraggableScrollableSheet(
+        initialChildSize: 0.5, // Tinggi awal 50%
+        minChildSize: 0.3, // Boleh diperkecil
+        maxChildSize: 0.85, // Maksimal 85% layar
+        expand: false,
+        builder: (context, scrollController) {
+          return SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: SingleChildScrollView(
+                controller: scrollController,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    /// ----- HEADER -----
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: Colors.blue.shade50,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.local_shipping,
+                                color: Colors.blue,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  cost.name ?? "-",
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                Text(
+                                  cost.service ?? "-",
+                                  style: TextStyle(
+                                    color: Colors.grey.shade600,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        GestureDetector(
+                          onTap: () => Navigator.pop(context),
+                          child: const Icon(Icons.close, size: 20),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    /// ----- DETAIL ITEMS -----
+                    buildDetailItem("Nama Kurir", cost.name),
+                    buildDetailItem("Kode", cost.code),
+                    buildDetailItem("Layanan", cost.service),
+                    buildDetailItem("Deskripsi", cost.description),
+                    buildDetailItem(
+                      "Biaya",
+                      "Rp${cost.cost?.toString() ?? '0'}",
+                    ),
+                    buildDetailItem(
+                      "Estimasi Pengiriman",
+                      "${cost.etd ?? '-'} ",
+                    ),
+
+                    const SizedBox(height: 20),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      );
+    },
+  );
+}
+
+Widget buildDetailItem(String title, String? value) {
+  return Padding(
+    padding: const EdgeInsets.only(bottom: 10),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 140,
+          child: Text(
+            title,
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+          ),
+        ),
+        const Text(" : "),
+        Expanded(
+          child: Text(value ?? "-", style: const TextStyle(fontSize: 14)),
+        ),
+      ],
+    ),
+  );
 }

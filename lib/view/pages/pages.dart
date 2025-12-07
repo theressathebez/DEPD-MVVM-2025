@@ -3,5 +3,10 @@ import 'package:provider/provider.dart';
 import 'package:depd_mvvm_2025/view/widgets/widgets.dart';
 import 'package:depd_mvvm_2025/viewmodel/home_viewmodel.dart';
 import 'package:depd_mvvm_2025/data/response/status.dart';
+import 'package:depd_mvvm_2025/model/model.dart';
+
 
 part 'home_page.dart';
+part 'bottom_nav.dart';
+part 'international_page.dart';
+part 'profile_page.dart';

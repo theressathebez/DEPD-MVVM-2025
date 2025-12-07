@@ -1,3 +1,4 @@
+import 'package:depd_mvvm_2025/repository/inter_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:depd_mvvm_2025/model/model.dart';
 import 'package:depd_mvvm_2025/data/response/api_response.dart';
@@ -8,7 +9,9 @@ import 'package:depd_mvvm_2025/repository/home_repository.dart';
 class HomeViewModel with ChangeNotifier {
   // Repository untuk akses API
   final _homeRepo = HomeRepository();
+  final _interRepo = InterRepository();
 
+  // ====================== PROVINCE =========================
   // State daftar provinsi
   ApiResponse<List<Province>> provinceList = ApiResponse.notStarted();
   setProvinceList(ApiResponse<List<Province>> response) {
@@ -38,6 +41,7 @@ class HomeViewModel with ChangeNotifier {
   // Cache kota per id provinsi agar tidak panggil API berulang
   final Map<int, List<City>> _cityCache = {};
 
+  // ====================== CITY ORIGIN =========================
   // State daftar kota asal
   ApiResponse<List<City>> cityOriginList = ApiResponse.notStarted();
   setCityOriginList(ApiResponse<List<City>> response) {
@@ -63,6 +67,7 @@ class HomeViewModel with ChangeNotifier {
         });
   }
 
+  // ====================== CITY DESTINATION =========================
   // State daftar kota tujuan
   ApiResponse<List<City>> cityDestinationList = ApiResponse.notStarted();
   setCityDestinationList(ApiResponse<List<City>> response) {
@@ -88,6 +93,7 @@ class HomeViewModel with ChangeNotifier {
         });
   }
 
+  // ====================== LOCAL COST =========================
   // State daftar biaya ongkir
   ApiResponse<List<Costs>> costList = ApiResponse.notStarted();
   setCostList(ApiResponse<List<Costs>> response) {
@@ -129,6 +135,71 @@ class HomeViewModel with ChangeNotifier {
         .onError((error, _) {
           setCostList(ApiResponse.error(error.toString()));
           setLoading(false);
+        });
+  }
+
+  // ====================== SELECTED ORIGIN PROVINCE =========================
+  String? selectedProvinceName;
+  int? selectedProvinceId;
+
+  void setSelectedProvince(String name, int id) {
+    selectedProvinceName = name;
+    selectedProvinceId = id;
+    notifyListeners();
+  }
+
+  // ======================== INTERNATIONAL DESTINATION ========================
+  ApiResponse<List<InternationalCountry>> countryList =
+      ApiResponse.notStarted();
+
+  setCountryList(ApiResponse<List<InternationalCountry>> response) {
+    countryList = response;
+    notifyListeners();
+  }
+
+  Future searchCountry(String query) async {
+    if (query.length < 3) return;
+
+    setCountryList(ApiResponse.loading());
+
+    _interRepo
+        .fetchInternationalDestination(query)
+        .then((value) {
+          setCountryList(ApiResponse.completed(value));
+        })
+        .catchError((error) {
+          setCountryList(ApiResponse.error(error.toString()));
+        });
+  }
+
+  // ======================== INTERNATIONAL COST ========================
+  ApiResponse<List<InterCost>> intCostList = ApiResponse.notStarted();
+
+  setInternationalCostList(ApiResponse<List<InterCost>> response) {
+    intCostList = response;
+    notifyListeners();
+  }
+
+  Future<void> checkInternationalCost(
+    String origin,
+    String destinationCountryCode,
+    int weight,
+    String courier,
+  ) async {
+    setInternationalCostList(ApiResponse.loading());
+
+    _interRepo
+        .checkInternationalCost(
+          origin: origin,
+          destinationCountryCode: destinationCountryCode,
+          weight: weight,
+          courier: courier,
+        )
+        .then((value) {
+          setInternationalCostList(ApiResponse.completed(value));
+        })
+        .catchError((error) {
+          setInternationalCostList(ApiResponse.error(error.toString()));
         });
   }
 }

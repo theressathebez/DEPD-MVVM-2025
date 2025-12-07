@@ -23,7 +23,7 @@ class HomeRepository {
     // Ubah setiap item (Map) menjadi object Province
     return data.map((e) => Province.fromJson(e)).toList();
   }
-
+ 
   // Mengambil daftar kota berdasarkan ID provinsi
   Future<List<City>> fetchCityList(var provId) async {
     final response = await _apiServices.getApiResponse(

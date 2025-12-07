@@ -12,9 +12,11 @@ class NetworkApiServices implements BaseApiServices {
   /// Melakukan request GET ke endpoint
   /// Mengembalikan JSON ter-decode atau melempar AppException yang sesuai.
   @override
-  Future<dynamic> getApiResponse(String endpoint) async {
+  Future<dynamic> getApiResponse(String endpoint, {
+  Map<String, dynamic>? queryParameters,
+}) async {
     try {
-      final uri = Uri.https(Const.baseUrl, Const.subUrl + endpoint);
+      final uri = Uri.https(Const.baseUrl, Const.subUrl + endpoint, queryParameters);
 
       // Log request GET (untuk debug: URL + header).
       _logRequest('GET', uri, Const.apiKey);

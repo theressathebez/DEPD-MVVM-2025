@@ -33,8 +33,8 @@ class InterRepository {
     final response = await _apiServices
         .postApiResponse('calculate/international-cost', {
           "origin": origin,
-          "destination_country_code": destinationCountryCode,
-          "weight": weight,
+          "destination": destinationCountryCode,
+          "weight": weight.toString(),
           "courier": courier,
         });
 

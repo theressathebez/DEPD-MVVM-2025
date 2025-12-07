@@ -235,7 +235,10 @@ class _InternationalPageState extends State<InternationalPage> {
                       return Card(
                         margin: const EdgeInsets.symmetric(vertical: 4),
                         child: ListTile(
-                          title: Text(country.countryName ?? "-"),
+                          title: Text(
+                            country.countryName ?? "-",
+                            overflow: TextOverflow.ellipsis,
+                          ),
                           trailing: isSelected
                               ? const Icon(Icons.check, color: Colors.green)
                               : null,
@@ -294,7 +297,7 @@ class _InternationalPageState extends State<InternationalPage> {
 
                   vm.checkInternationalCost(
                     selectedCity!.id.toString(),
-                    selectedCountryCode!,
+                    selectedCountryCode.toString(),
                     weight,
                     selectedCourier,
                   );
@@ -328,13 +331,25 @@ class _InternationalPageState extends State<InternationalPage> {
                   );
                 }
 
-                if (vm.intCostList.data != null) {
-                  return Card(
-                    color: Colors.blue[50],
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Text(vm.intCostList.data.toString()),
-                    ),
+                if (vm.intCostList.status == Status.completed) {
+                  final data = vm.intCostList.data ?? [];
+
+                  if (data.isEmpty) {
+                    return const Text("Tidak ada data ongkir internasional.");
+                  }
+
+                  return ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: data.length,
+                    itemBuilder: (context, index) {
+                      final cost = data[index];
+
+                      return GestureDetector(
+                        onTap: () => _showInterCostDetail(context, cost),
+                        child: CardInterCost(cost)
+                      );
+                    },
                   );
                 }
 
@@ -346,4 +361,122 @@ class _InternationalPageState extends State<InternationalPage> {
       ),
     );
   }
+}
+
+void _showInterCostDetail(BuildContext context, InterCost cost) {
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Colors.white,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    ),
+    builder: (_) {
+      return DraggableScrollableSheet(
+        initialChildSize: 0.45,
+        minChildSize: 0.3,
+        maxChildSize: 0.85,
+        expand: false,
+        builder: (context, scrollController) {
+          return SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: SingleChildScrollView(
+                controller: scrollController,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    /// ================= HEADER (Ikon Pesawat + Judul) =================
+                    Row(
+                      children: [
+                        Container(
+                          height: 48,
+                          width: 48,
+                          decoration: BoxDecoration(
+                            color: Colors.blue.shade50,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.flight_takeoff,
+                            color: Colors.blue,
+                            size: 26,
+                          ),
+                        ),
+                        const SizedBox(width: 14),
+
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              cost.name ?? "-",
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black87,
+                              ),
+                            ),
+                            Text(
+                              cost.code ?? "-",
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.blue.shade800,
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        const Spacer(),
+                        GestureDetector(
+                          onTap: () => Navigator.pop(context),
+                          child: const Icon(Icons.close, size: 20),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    /// ======================== DETAIL ITEMS ========================
+                    _interDetailRow("Biaya", "Rp${cost.cost ?? 0}"),
+                    const SizedBox(height: 6),
+
+                    _interDetailRow("Estimasi", cost.etd?.toString() ?? "-"),
+                    const SizedBox(height: 6),
+
+                    _interDetailRow("Layanan", cost.service ?? "-"),
+                    const SizedBox(height: 6),
+
+                    _interDetailRow("Deskripsi", cost.description ?? "-"),
+
+                    const SizedBox(height: 20),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      );
+    },
+  );
+}
+
+Widget _interDetailRow(String title, String value) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 4),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 110,
+          child: Text(
+            title,
+            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+          ),
+        ),
+        const Text(" : "),
+        Expanded(child: Text(value, style: const TextStyle(fontSize: 14))),
+      ],
+    ),
+  );
 }

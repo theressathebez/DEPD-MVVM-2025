@@ -572,9 +572,9 @@ void _showCostDetail(BuildContext context, Costs cost) {
     ),
     builder: (_) {
       return DraggableScrollableSheet(
-        initialChildSize: 0.5, // Tinggi awal 50%
-        minChildSize: 0.3, // Boleh diperkecil
-        maxChildSize: 0.85, // Maksimal 85% layar
+        initialChildSize: 0.5,
+        minChildSize: 0.3, 
+        maxChildSize: 0.85, 
         expand: false,
         builder: (context, scrollController) {
           return SafeArea(

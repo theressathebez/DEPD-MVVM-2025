@@ -6,7 +6,7 @@ class InterCost extends Equatable {
 	final String? service;
 	final String? description;
 	final String? currency;
-	final int? cost;
+	final double? cost;
 	final String? etd;
 	final String? currencyUpdatedAt;
 	final double? currencyValue;
@@ -29,7 +29,7 @@ class InterCost extends Equatable {
 				service: json['service'] as String?,
 				description: json['description'] as String?,
 				currency: json['currency'] as String?,
-				cost: json['cost'] as int?,
+				cost: (json['cost'] as num?)?.toDouble(),
 				etd: json['etd'] as String?,
 				currencyUpdatedAt: json['currency_updated_at'] as String?,
 				currencyValue: (json['currency_value'] as num?)?.toDouble(),
